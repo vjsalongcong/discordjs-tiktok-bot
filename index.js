@@ -228,3 +228,10 @@ client
     .login(config.TOKEN)
     .then(() => console.log("Connected as " + client.user.tag))
     .catch(console.error);
+
+// Catch SIGINT to end program
+var process = require('process')
+process.on('SIGINT', () => {
+  console.info("Interrupted")
+  process.exit(0)
+})
