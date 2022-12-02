@@ -163,7 +163,7 @@ client.on("messageUpdate", (old_msg, new_msg) => {
 });
 
 async function get_tiktok_url(url) {
-    let browser = await puppeteer.launch();
+    let browser = await puppeteer.launch({args: ['--no-sandbox']});
     const page = await browser.newPage();
     await page.goto("https://snaptik.app/en");
     await page.evaluate((url) => {
