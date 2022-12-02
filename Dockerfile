@@ -1,4 +1,4 @@
-FROM node:latest
+FROM docker.io/library/node:latest
 
 # Install google-chrome
 RUN apt-get update \
