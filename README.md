@@ -1,4 +1,5 @@
-# Tiktok To Discord
+# *This is a FORK of an exisiting project*
+## Tiktok To Discord
 A Discord bot to automatically download and post the raw video file behind a TikTok link.  
 **Also supports photo TikToks.**
 
@@ -30,7 +31,7 @@ Set `config.EMBED_TWITTER_VIDEO` to enabled this.
 * You **might** need to install some Chromium related dependencies for Puppeteer to work
   * If you have problems, maybe see this [issue comment](https://github.com/0x464e/tiktok_to_discord/issues/3#issuecomment-1257024391), or just Google.
 * Clone this repository
-`git clone https://github.com/0x464e/tiktok_to_discord`
+`git clone https://github.com/vjsalongcong/discordjs-tiktok-bot`
 * Insert your Discord bot's token into `config.json` 
 * Install the required Node packages from `package.json` by running `npm install`
 ---
