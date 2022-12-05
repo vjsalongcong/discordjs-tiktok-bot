@@ -10,7 +10,7 @@ const puppeteer = require("puppeteer");
 const filesizeLimit = {
     default: 8 * 1024 * 1024 - 1000, // reserve 1KB for the message body
     tier2: 50 * 1024 * 1024 - 1000,
-    tier3: 100 * 1024 * 1024 - 1000,
+    tier3: 100 * 1024 * 1024 - 1000
 };
 
 let cooldown_users = new Set();
