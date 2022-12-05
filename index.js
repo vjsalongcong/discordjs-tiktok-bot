@@ -53,7 +53,17 @@ client.on("messageCreate", async (msg) => {
                             );
                             if (too_large && !config.BOOSTED_CHANNEL_ID)
                                 // no channel set from which to borrow file size limits
-                                report_filesize_error(msg);
+                                compress_direct_url(direct_url).then((compressed_url) => {
+                                    msg.reply({
+                                        files: [
+                                            {
+                                                attachment: compressed_url,
+                                                name: `${Date.now()}.mp4`,
+                                            },
+                                        ],
+                                        allowedMentions: { repliedUser: false },
+                                    }).catch(console.error);
+                                });
                             else if (too_large)
                                 client.channels
                                     .fetch(config.BOOSTED_CHANNEL_ID)
@@ -162,6 +172,7 @@ client.on("messageUpdate", (old_msg, new_msg) => {
     }
 });
 
+// Sends tikok link to snaptik to get raw video url
 async function get_tiktok_url(url) {
     let browser = await puppeteer.launch({args: ['--no-sandbox']});
     const page = await browser.newPage();
@@ -182,6 +193,30 @@ async function get_tiktok_url(url) {
 
     await browser.close();
     return direct_url;
+}
+
+// Sends raw video url to 8mb.video for compression
+async function compress_direct_url(url) {
+    let browser = await puppeteer.launch({args: ['--no-sandbox']});
+    const page = await browser.newPage();
+    await page.goto("https://8mb.video/");
+    await page.evaluate((url) => {
+        document.querySelector("#extraline > a").click('a');
+        document.getElementById("url").value = url;
+        document.getElementById("rockandroll").click();
+    }, url);
+    try {
+        await page.waitForSelector(".dl", { timeout: 60000 });
+    } catch (err) {
+        return;
+    }
+
+    let compressed_url = await page.evaluate(() => {
+        return document.getElementById("dllink").href;
+    });
+
+    await browser.close();
+    return compressed_url;
 }
 
 function is_too_large_attachment(guild, stream) {
