@@ -201,6 +201,7 @@ async function compress_direct_url(url) {
     const page = await browser.newPage();
     await page.goto("https://8mb.video/");
     await page.evaluate((url) => {
+        document.querySelector("#hq").click();
         document.querySelector("#extraline > a").click('a');
         document.getElementById("url").value = url;
         document.getElementById("rockandroll").click();
