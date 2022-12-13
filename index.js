@@ -10,7 +10,7 @@ const puppeteer = require("puppeteer");
 const filesizeLimit = {
     default: 8 * 1024 * 1024 - 1000, // reserve 1KB for the message body
     tier2: 50 * 1024 * 1024 - 1000,
-    tier3: 100 * 1024 * 1024 - 1000
+    tier3: 100 * 1024 * 1024 - 1000,
 };
 
 let cooldown_users = new Set();
@@ -53,17 +53,11 @@ client.on("messageCreate", async (msg) => {
                             );
                             if (too_large && !config.BOOSTED_CHANNEL_ID)
                                 // no channel set from which to borrow file size limits
-                                compress_direct_url(direct_url).then((compressed_url) => {
-                                    msg.reply({
-                                        files: [
-                                            {
-                                                attachment: compressed_url,
-                                                name: `${Date.now()}.mp4`,
-                                            },
-                                        ],
-                                        allowedMentions: { repliedUser: false },
-                                    }).catch(console.error);
-                                });
+                                compress_direct_url(direct_url).then(
+                                    (compressed_url) => {
+                                        reply_video(msg, compressed_url);
+                                    }
+                                );
                             else if (too_large)
                                 client.channels
                                     .fetch(config.BOOSTED_CHANNEL_ID)
@@ -101,16 +95,7 @@ client.on("messageCreate", async (msg) => {
                                                 .catch(console.error); // if sending to the boosted channel failed
                                     })
                                     .catch(() => report_filesize_error(msg));
-                            else
-                                msg.reply({
-                                    files: [
-                                        {
-                                            attachment: axios_response.data,
-                                            name: `${Date.now()}.mp4`,
-                                        },
-                                    ],
-                                    allowedMentions: { repliedUser: false },
-                                }).catch(console.error); // if sending of the Discord message itself failed, just log error to console
+                            else reply_video(msg, axios_response.data);
                         })
                         .catch((err) => report_error(msg, err))
                 ); // if axios.get() failed
@@ -120,11 +105,7 @@ client.on("messageCreate", async (msg) => {
             ) {
                 execFile("gallery-dl", ["-g", url], (error, stdout, stderr) => {
                     if (error) return;
-                    if (/\.mp4/.test(stdout))
-                        msg.reply({
-                            content: stdout,
-                            allowedMentions: { repliedUser: false },
-                        }).catch(console.error);
+                    if (/\.mp4/.test(stdout)) reply_video(msg, stdout);
                 });
             }
         });
@@ -176,7 +157,8 @@ client.on("messageUpdate", (old_msg, new_msg) => {
 async function get_tiktok_url(url) {
     let browser = await puppeteer.launch({
         executablePath: process.env.CHROME_BIN || null,
-        args: ['--no-sandbox']});
+        args: ["--no-sandbox"],
+    });
     const page = await browser.newPage();
     await page.goto("https://snaptik.app/en");
     await page.evaluate((url) => {
@@ -201,12 +183,13 @@ async function get_tiktok_url(url) {
 async function compress_direct_url(url) {
     let browser = await puppeteer.launch({
         executablePath: process.env.CHROME_BIN || null,
-        args: ['--no-sandbox']});
+        args: ["--no-sandbox"],
+    });
     const page = await browser.newPage();
     await page.goto("https://8mb.video/");
     await page.evaluate((url) => {
         document.querySelector("#hq").click();
-        document.querySelector("#extraline > a").click('a');
+        document.querySelector("#extraline > a").click("a");
         document.getElementById("url").value = url;
         document.getElementById("rockandroll").click();
     }, url);
@@ -244,6 +227,20 @@ function is_too_large_attachment(guild, stream) {
     return stream.data.length >= limit;
 }
 
+// MESSAGES
+// Reply with video
+function reply_video(msg, video) {
+    msg.reply({
+        files: [
+            {
+                attachment: video,
+                name: `${Date.now()}.mp4`,
+            },
+        ],
+        allowedMentions: { repliedUser: false },
+    }).catch(console.error); // if sending of the Discord message itself failed, just log error to console
+}
+
 // Error reply messages
 function report_error(msg, error) {
     title_msg = "Error";
@@ -270,9 +267,9 @@ client
     .catch(console.error);
 
 // Catch signal to end program
-async function closeGracefully(signal) {
-    console.info("Interrupted")
-    process.exit(0)
+async function closeGracefully() {
+    console.info("Interrupted");
+    process.exit(0);
 }
-process.once('SIGINT', closeGracefully)
-process.once('SIGTERM', closeGracefully)
+process.once("SIGINT", closeGracefully);
+process.once("SIGTERM", closeGracefully);
