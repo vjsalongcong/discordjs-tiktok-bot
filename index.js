@@ -174,7 +174,9 @@ client.on("messageUpdate", (old_msg, new_msg) => {
 
 // Sends tikok link to snaptik to get raw video url
 async function get_tiktok_url(url) {
-    let browser = await puppeteer.launch({args: ['--no-sandbox']});
+    let browser = await puppeteer.launch({
+        executablePath: process.env.CHROME_BIN || null,
+        args: ['--no-sandbox']});
     const page = await browser.newPage();
     await page.goto("https://snaptik.app/en");
     await page.evaluate((url) => {
@@ -197,7 +199,9 @@ async function get_tiktok_url(url) {
 
 // Sends raw video url to 8mb.video for compression
 async function compress_direct_url(url) {
-    let browser = await puppeteer.launch({args: ['--no-sandbox']});
+    let browser = await puppeteer.launch({
+        executablePath: process.env.CHROME_BIN || null,
+        args: ['--no-sandbox']});
     const page = await browser.newPage();
     await page.goto("https://8mb.video/");
     await page.evaluate((url) => {
@@ -265,9 +269,10 @@ client
     .then(() => console.log("Connected as " + client.user.tag))
     .catch(console.error);
 
-// Catch SIGINT to end program
-var process = require('process')
-process.on('SIGINT', () => {
-  console.info("Interrupted")
-  process.exit(0)
-})
+// Catch signal to end program
+async function closeGracefully(signal) {
+    console.info("Interrupted")
+    process.exit(0)
+}
+process.once('SIGINT', closeGracefully)
+process.once('SIGTERM', closeGracefully)
