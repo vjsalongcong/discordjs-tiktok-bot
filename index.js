@@ -184,7 +184,6 @@ async function compress_direct_url(url) {
     let browser = await puppeteer.launch({
         executablePath: process.env.CHROME_BIN || null,
         args: ["--no-sandbox"],
-        headless: false
     });
     const page = await browser.newPage();
     await page.goto("https://8mb.video/");
