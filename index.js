@@ -51,14 +51,15 @@ client.on("messageCreate", async (msg) => {
                                 msg.guild,
                                 axios_response
                             );
-                            if (too_large && !config.BOOSTED_CHANNEL_ID)
+                            if (too_large && !config.BOOSTED_CHANNEL_ID) {
                                 // no channel set from which to borrow file size limits
+                                info_filesize_large(msg, url);
                                 compress_direct_url(direct_url).then(
                                     (compressed_url) => {
                                         reply_video(msg, compressed_url);
                                     }
                                 );
-                            else if (too_large)
+                            } else if (too_large)
                                 client.channels
                                     .fetch(config.BOOSTED_CHANNEL_ID)
                                     .then((channel) => {
@@ -239,6 +240,22 @@ function reply_video(msg, video) {
         ],
         allowedMentions: { repliedUser: false },
     }).catch(console.error); // if sending of the Discord message itself failed, just log error to console
+}
+
+// Reply that video is being compressed then delete is after 50 seconds
+async function info_filesize_large(msg, url) {
+    title_msg = "File is being Compressed";
+    desc_msg = `${url}\n\nThe video was too big, so just wait.\nIt might take a while :)`;
+    msg.reply({
+        embeds: [embed_msg(title_msg, desc_msg)],
+        allowedMentions: { repliedUser: false },
+    })
+        .then((sentMessage) => {
+            setTimeout(() => {
+                sentMessage.delete();
+            }, 60000);
+        })
+        .catch(console.error);
 }
 
 // Error reply messages
