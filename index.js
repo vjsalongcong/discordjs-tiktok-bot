@@ -184,6 +184,7 @@ async function compress_direct_url(url) {
     let browser = await puppeteer.launch({
         executablePath: process.env.CHROME_BIN || null,
         args: ["--no-sandbox"],
+        headless: false
     });
     const page = await browser.newPage();
     await page.goto("https://8mb.video/");
@@ -194,7 +195,7 @@ async function compress_direct_url(url) {
         document.getElementById("rockandroll").click();
     }, url);
     try {
-        await page.waitForSelector(".dl", { timeout: 60000 });
+        await page.waitForSelector(".dl", { timeout: 100000 * config.MAX_TIKTOKS_PER_MESSAGE });
     } catch (err) {
         return;
     }
