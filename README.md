@@ -1,10 +1,9 @@
-## *This is a FORK of an exisiting project*
-*This has been modified to satisfy the needs of a private discord server*
+## This is a FORK of an exisiting project
+**Credits to the original creator [0x464e](https://github.com/0x464e) and the project [tiktok_to_discord](https://github.com/0x464e/tiktok_to_discord)**
 
----
+*This has been modified to satisfy the needs of a private discord server.*
 
-### Credits
-* Original creator of this project - [0x464e](https://github.com/0x464e) and the project [tiktok_to_discord](https://github.com/0x464e/tiktok_to_discord)
+I don't know how to code in JavaScript or use Docker and I'm just learning as I go along. Please excuse the bad code/implementations/formatting! :D
 
 ---
 
@@ -13,15 +12,9 @@ A Discord bot to automatically download and post the raw video file behind a Tik
 **Also supports photo TikToks.**
 
 Discord doesn't embed TikTok video links at all, this removes the huge annoyance of having to open the link in your web browser to view the video.  
-![Demonstration](https://i.imgur.com/k4DlynO.gif)  
-This is my first *larger* js/nodejs project, so please excuse possible bad code/implementations.
+![Demonstration](https://i.imgur.com/k4DlynO.gif)
 
 ---
-
-Now ~~temporarily~~ also embeds Twitter videos ~~since Discord managed to break that.  
-I'm sure it'll be fixed, so this will get removed then.~~  
-This is now fixed, but the default Twitter video player is such trash that I'm keeping this feature in here. With this feature you can straight away get max quality playback instead of being stuck with the very low quality version that the Twitter player will give you.  
-Set `config.EMBED_TWITTER_VIDEO` to enabled this.
 
 ## Getting  Started
 
