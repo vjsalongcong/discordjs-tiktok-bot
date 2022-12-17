@@ -43,6 +43,13 @@ client.on("messageCreate", async (msg) => {
                 get_tiktok_url(url).then((direct_url) =>
                     process_video_url(msg, url, direct_url)
                 );
+            } else if (/(www\.instagram\.com\/reel\/)/.test(url)) {
+                cooldown_users.add(msg.author.id);
+                found_match = true;
+                msg.channel.sendTyping().catch(console.error);
+                get_reels_url(url).then((direct_url) =>
+                    process_video_url(msg, url, direct_url)
+                );
             } else if (
                 config.EMBED_TWITTER_VIDEO &&
                 /\Wtwitter\.com\/.+?\/status\//.test(url)
@@ -119,6 +126,34 @@ async function get_tiktok_url(url) {
     let direct_url = await page.evaluate(() => {
         return document.getElementsByClassName("btn-main active")[0].href;
     });
+
+    await browser.close();
+    return direct_url;
+}
+
+// Sends reels link to snapinsta to get raw video url
+async function get_reels_url(url) {
+    let browser = await puppeteer.launch({
+        executablePath: process.env.CHROME_BIN || null,
+        args: ["--no-sandbox"],
+    });
+        
+    const page = await browser.newPage();
+    await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36");
+    await page.goto("https://snapinsta.app/");
+    await page.evaluate((url) => {
+        document.getElementById("url").value = url;
+        document.getElementById("send").click();
+    }, url);
+    try {
+        await page.waitForSelector(".download-box", { timeout: 60000 });
+    } catch (err) {
+        return;
+    }
+
+    let direct_url = await page.evaluate(() => {
+        return document.querySelector(".download-items__btn a").href;
+    });    
 
     await browser.close();
     return direct_url;
@@ -225,7 +260,7 @@ function process_video_url(msg, url, direct_url) {
                     .catch(() => report_filesize_error(msg));
             else reply_video(msg, axios_response.data);
         })
-        .catch((err) => report_error(msg, err)); // if axios.get() failed
+        .catch((err) => report_error(msg, url, err)); // if axios.get() failed
 }
 
 // MESSAGES
@@ -259,9 +294,9 @@ async function info_filesize_large(msg, url) {
 }
 
 // Error reply messages
-function report_error(msg, error) {
+function report_error(msg, url, error) {
     title_msg = "Error";
-    desc_msg = `There was a problem trying to download this TikTok :( \n\nLogs:\n\`${error}\``;
+    desc_msg = `${url}\n\nThere was a problem trying to download this video :( \n\nLogs:\n\`${error}\``;
     msg.reply({
         embeds: [embed_msg(title_msg, desc_msg)],
         allowedMentions: { repliedUser: false },
@@ -270,7 +305,7 @@ function report_error(msg, error) {
 
 function report_filesize_error(msg) {
     title_msg = "File limit Exceeded";
-    desc_msg = "Uh oh! This TikTok exceeds the file limit Discord allows :/";
+    desc_msg = "Uh oh! This video exceeds the file limit Discord allows :/";
     msg.reply({
         embeds: [embed_msg(title_msg, desc_msg)],
         allowedMentions: { repliedUser: false },
