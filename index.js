@@ -4,7 +4,7 @@ const client = new Client({intents: ["Guilds", "DirectMessages", "GuildMessages"
 const urlRegex = require("url-regex-safe");
 const axios = require("axios");
 const { execFile } = require("child_process");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 const filesizeLimit = {
     default: 8 * 1024 * 1024 - 1000, // reserve 1KB for the message body
     tier2: 50 * 1024 * 1024 - 1000,
@@ -107,10 +107,7 @@ client.on("messageUpdate", (old_msg, new_msg) => {
 // PROCESSING
 // Sends tikok link to snaptik to get raw video url
 async function get_tiktok_url(url) {
-    let browser = await puppeteer.launch({
-        executablePath: process.env.CHROME_BIN || null,
-        args: ["--no-sandbox"],
-    });
+    let browser = await puppeteer.launch({executablePath: process.env.BROWSER_BIN || null});
     const page = await browser.newPage();
     await page.goto("https://snaptik.app/en");
     await page.evaluate((url) => {
@@ -133,11 +130,7 @@ async function get_tiktok_url(url) {
 
 // Sends reels link to snapinsta to get raw video url
 async function get_reels_url(url) {
-    let browser = await puppeteer.launch({
-        executablePath: process.env.CHROME_BIN || null,
-        args: ["--no-sandbox"],
-    });
-        
+    let browser = await puppeteer.launch({executablePath: process.env.BROWSER_BIN || null});
     const page = await browser.newPage();
     await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36");
     await page.goto("https://snapinsta.app/");
@@ -161,10 +154,7 @@ async function get_reels_url(url) {
 
 // Sends raw video url to 8mb.video for compression
 async function compress_direct_url(url) {
-    let browser = await puppeteer.launch({
-        executablePath: process.env.CHROME_BIN || null,
-        args: ["--no-sandbox"],
-    });
+    let browser = await puppeteer.launch({executablePath: process.env.BROWSER_BIN || null});
     const page = await browser.newPage();
     await page.goto("https://8mb.video/");
     await page.evaluate((url) => {

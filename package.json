@@ -14,7 +14,7 @@
     },
     "devDependencies": {
         "axios": "^1.2.1",
-        "puppeteer": "^19.4.0",
+        "puppeteer-core": "^19.4.0",
         "url-regex-safe": "^3.0.0"
     }
 }
