@@ -36,7 +36,7 @@ client.on("messageCreate", async (msg) => {
     Array.from(new Set(msg.content.match(urlRegex())))
         .slice(0, config.MAX_LINKS_PER_MESSAGE)
         .forEach((url) => {
-            if (/(www\.tiktok\.com)|(vm\.tiktok\.com)/.test(url)) {
+            if (/(www\.tiktok\.com)|(vm\.tiktok\.com)|(vt\.tiktok\.com)/.test(url)) {
                 cooldown_users.add(msg.author.id);
                 found_match = true;
                 msg.channel.sendTyping().catch(console.error);
