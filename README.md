@@ -9,7 +9,6 @@ I don't know how to code in JavaScript or use Docker and I'm just learning as I 
 
 # Tiktok To Discord
 A Discord bot to automatically download and post the raw video file behind a TikTok link.  
-**Also supports photo TikToks.**
 
 Discord doesn't embed TikTok video links at all, this removes the huge annoyance of having to open the link in your web browser to view the video.  
 ![Demonstration](https://i.imgur.com/k4DlynO.gif)
