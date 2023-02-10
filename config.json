@@ -2,9 +2,7 @@
   "TOKEN": "",
   "COOLDOWN_PER_USER": 7500,
   "MAX_LINKS_PER_MESSAGE": 5,
-  "DB_PATH": "database.json",
-  "USE_DATABASE": true,
-  "STORE_THUMBNAILS": true,
+  "YT_DLP_PATH": "yt-dlp",
   "EMBED_TWITTER_VIDEO": false,
   "BOOSTED_CHANNEL_ID": ""
 }

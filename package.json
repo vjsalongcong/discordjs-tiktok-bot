@@ -1,20 +1,19 @@
 {
-    "name": "discordjs-tiktok-bot",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "discord.js": "^14.7.1"
-    },
-    "devDependencies": {
-        "axios": "^1.2.1",
-        "puppeteer-core": "^19.4.0",
-        "url-regex-safe": "^3.0.0"
-    }
+  "name": "discordjs-tiktok-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+      "discord.js": "^14.7.1",
+      "axios": "^1.2.1",
+      "puppeteer-core": "^19.4.0",
+      "url-regex-safe": "^3.0.0",
+      "yt-dlp-wrap": "^2.3.11"
+  }
 }

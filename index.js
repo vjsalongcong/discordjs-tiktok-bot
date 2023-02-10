@@ -4,6 +4,8 @@ const client = new Client({intents: ["Guilds", "DirectMessages", "GuildMessages"
 const urlRegex = require("url-regex-safe");
 const axios = require("axios");
 const { execFile } = require("child_process");
+const YTDlpWrap = require("yt-dlp-wrap").default;
+const ytDlpWrap = new YTDlpWrap(config.YT_DLP_PATH);
 const puppeteer = require("puppeteer-core");
 const filesizeLimit = {
     default: 8 * 1024 * 1024 - 1000, // reserve 1KB for the message body
@@ -32,7 +34,7 @@ client.on("messageCreate", async (msg) => {
         return;
     let found_match = false;
 
-    // Convert to set to remove duplicates and then back to array to be able to slice (slicing so max 5 tiktoks per message)
+    // Convert to set to remove duplicates and then back to array to be able to slice (slicing so max config.MAX_TIKTOKS_PER_MESSAGE tiktoks per message)
     Array.from(new Set(msg.content.match(urlRegex())))
         .slice(0, config.MAX_LINKS_PER_MESSAGE)
         .forEach((url) => {
@@ -42,14 +44,14 @@ client.on("messageCreate", async (msg) => {
                 msg.channel.sendTyping().catch(console.error);
                 get_tiktok_url(url).then((direct_url) =>
                     process_video_url(msg, url, direct_url)
-                );
+                ).catch((err) => report_error(msg, url, err)); // if get_tiktok_url() failed
             } else if (/(www\.instagram\.com\/reel\/)/.test(url)) {
                 cooldown_users.add(msg.author.id);
                 found_match = true;
                 msg.channel.sendTyping().catch(console.error);
                 get_reels_url(url).then((direct_url) =>
                     process_video_url(msg, url, direct_url)
-                );
+                ).catch((err) => report_error(msg, url, err)); // if get_reels_url() failed
             } else if (
                 config.EMBED_TWITTER_VIDEO &&
                 /\Wtwitter\.com\/.+?\/status\//.test(url)
@@ -105,27 +107,10 @@ client.on("messageUpdate", (old_msg, new_msg) => {
 });
 
 // PROCESSING
-// Sends tikok link to snaptik to get raw video url
+// Sends tikok link to ytdl to get raw video url
 async function get_tiktok_url(url) {
-    let browser = await puppeteer.launch({executablePath: process.env.BROWSER_BIN || null});
-    const page = await browser.newPage();
-    await page.goto("https://snaptik.app/en");
-    await page.evaluate((url) => {
-        document.getElementById("url").value = url;
-        document.getElementsByClassName("btn-go")[0].click();
-    }, url);
-    try {
-        await page.waitForSelector(".download-box", { timeout: 60000 });
-    } catch (err) {
-        return;
-    }
-
-    let direct_url = await page.evaluate(() => {
-        return document.getElementsByClassName("btn-main active")[0].href;
-    });
-
-    await browser.close();
-    return direct_url;
+    let metadata = await ytDlpWrap.getVideoInfo([url, "-f", "best[vcodec=h264]"]);
+    return metadata.urls;
 }
 
 // Sends reels link to snapinsta to get raw video url
@@ -304,7 +289,7 @@ function report_filesize_error(msg) {
 
 // Console message
 client
-    .login(config.TOKEN)
+    .login(process.env.TOKEN || config.TOKEN)
     .then(() => console.log("Connected as " + client.user.tag))
     .catch(console.error);
 

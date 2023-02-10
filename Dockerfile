@@ -3,6 +3,9 @@ FROM docker.io/library/alpine:latest
 #Install node
 RUN apk add --update --no-cache nodejs npm
 
+#Install python pip
+RUN apk add --no-cache py-pip
+
 # Install chromium
 ENV BROWSER_BIN=/usr/bin/chromium-browser
 RUN apk add --no-cache chromium
@@ -18,6 +21,7 @@ WORKDIR /usr/src/bot
 # Copy and Install dependencies
 COPY package.json /usr/src/bot
 RUN npm install
+RUN python3 -m pip install -U yt-dlp
 
 # Bundle app source
 COPY . /usr/src/bot
