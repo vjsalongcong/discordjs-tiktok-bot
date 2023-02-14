@@ -38,20 +38,17 @@ client.on("messageCreate", async (msg) => {
     Array.from(new Set(msg.content.match(urlRegex())))
         .slice(0, config.MAX_LINKS_PER_MESSAGE)
         .forEach((url) => {
-            if (/(www\.tiktok\.com)|(vm\.tiktok\.com)|(vt\.tiktok\.com)/.test(url)) {
+            if (
+                /(www\.tiktok\.com)|(vm\.tiktok\.com)|(vt\.tiktok\.com)/.test(url) || 
+                /(www\.instagram\.com\/reel\/)/.test(url) ||
+                /(www\.youtube\.com\/shorts\/)/.test(url)
+            ) {
                 cooldown_users.add(msg.author.id);
                 found_match = true;
                 msg.channel.sendTyping().catch(console.error);
-                get_tiktok_url(url).then((direct_url) =>
+                get_video_url(url).then((direct_url) =>
                     process_video_url(msg, url, direct_url)
-                ).catch((err) => report_error(msg, url, err)); // if get_tiktok_url() failed
-            } else if (/(www\.instagram\.com\/reel\/)/.test(url)) {
-                cooldown_users.add(msg.author.id);
-                found_match = true;
-                msg.channel.sendTyping().catch(console.error);
-                get_reels_url(url).then((direct_url) =>
-                    process_video_url(msg, url, direct_url)
-                ).catch((err) => report_error(msg, url, err)); // if get_reels_url() failed
+                ).catch((err) => report_error(msg, url, err)); // if get_video_url() failed
             } else if (
                 config.EMBED_TWITTER_VIDEO &&
                 /\Wtwitter\.com\/.+?\/status\//.test(url)
@@ -107,34 +104,18 @@ client.on("messageUpdate", (old_msg, new_msg) => {
 });
 
 // PROCESSING
-// Sends tikok link to ytdl to get raw video url
-async function get_tiktok_url(url) {
-    let metadata = await ytDlpWrap.getVideoInfo([url, "-f", "best[vcodec=h264]"]);
-    return metadata.urls;
-}
-
-// Sends reels link to snapinsta to get raw video url
-async function get_reels_url(url) {
-    let browser = await puppeteer.launch({executablePath: process.env.BROWSER_BIN || null});
-    const page = await browser.newPage();
-    await page.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36");
-    await page.goto("https://snapinsta.app/");
-    await page.evaluate((url) => {
-        document.getElementById("url").value = url;
-        document.getElementById("send").click();
-    }, url);
-    try {
-        await page.waitForSelector(".download-box", { timeout: 60000 });
-    } catch (err) {
-        return;
+// Sends link to ytdl to get raw video url
+async function get_video_url(url) {
+    let options;
+    if (/(www\.instagram\.com\/reel\/)/.test(url)) {
+        options = url;
+    } else if (/(www\.youtube\.com\/shorts\/)/.test(url)) {
+        options = [url, "-f", "best"];
+    } else {
+        options = [url, "-f", "best[vcodec=h264]"];
     }
-
-    let direct_url = await page.evaluate(() => {
-        return document.querySelector(".download-items__btn a").href;
-    });    
-
-    await browser.close();
-    return direct_url;
+    let metadata = await ytDlpWrap.getVideoInfo(options);
+    return metadata.urls;
 }
 
 // Sends raw video url to 8mb.video for compression
