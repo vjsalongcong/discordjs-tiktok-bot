@@ -21,7 +21,7 @@ WORKDIR /usr/src/bot
 # Copy and Install dependencies
 COPY package.json /usr/src/bot
 RUN npm install
-RUN apk add --no-cache yt-dlp
+RUN pip install --no-cache --break-system-packages yt-dlp
 
 # Bundle app source
 COPY . /usr/src/bot
